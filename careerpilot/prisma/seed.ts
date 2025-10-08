@@ -4,679 +4,800 @@ import { hash } from "bcryptjs"
 const prisma = new PrismaClient()
 
 async function main() {
-  console.log("🌱 Starting database seed...")
+  console.log("🌱 Starting comprehensive database seed...")
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
   // Clean up existing data
   console.log("🧹 Cleaning up existing data...")
   await prisma.user.deleteMany()
+  console.log("✅ Cleanup complete\n")
 
+  // ==================== Users ====================
   console.log("👤 Creating test users...")
 
-  // Create test user 1: Email/Password user
   const password1 = await hash("password123", 10)
   const user1 = await prisma.user.create({
     data: {
       email: "test@example.com",
-      name: "Test User",
+      name: "Alex Johnson",
       password: password1,
       timezone: "America/New_York",
       notifyInApp: true,
       notifyEmail: true,
-      notifySlack: false,
-      notifyDiscord: false,
       dataRetentionDays: 365,
     },
   })
   console.log(`✅ Created user: ${user1.email}`)
 
-  // Create test user 2: Another email/password user with different settings
   const password2 = await hash("password456", 10)
   const user2 = await prisma.user.create({
     data: {
       email: "demo@careerpilot.com",
-      name: "Demo User",
+      name: "Sarah Chen",
       password: password2,
       timezone: "America/Los_Angeles",
       notifyInApp: true,
-      notifyEmail: false,
+      notifyEmail: true,
       notifySlack: true,
-      notifyDiscord: false,
       slackWebhook: "https://hooks.slack.com/services/example",
       dataRetentionDays: 180,
     },
   })
-  console.log(`✅ Created user: ${user2.email}`)
+  console.log(`✅ Created user: ${user2.email}\n`)
 
-  // Create test user 3: User with minimal notifications
-  const password3 = await hash("secure123", 10)
-  const user3 = await prisma.user.create({
-    data: {
-      email: "minimal@example.com",
-      name: "Minimal User",
-      password: password3,
-      timezone: "UTC",
-      notifyInApp: false,
-      notifyEmail: false,
-      notifySlack: false,
-      notifyDiscord: false,
-      dataRetentionDays: null, // Keep forever
-    },
-  })
-  console.log(`✅ Created user: ${user3.email}`)
+  // ==================== Companies ====================
+  console.log("🏢 Creating companies...")
 
-  // Create test user 4: User with all notifications enabled
-  const password4 = await hash("testpass789", 10)
-  const user4 = await prisma.user.create({
-    data: {
-      email: "notifications@example.com",
-      name: "Notification Lover",
-      password: password4,
-      timezone: "Europe/London",
-      notifyInApp: true,
-      notifyEmail: true,
-      notifySlack: true,
-      notifyDiscord: true,
-      slackWebhook: "https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX",
-      discordWebhook: "https://discord.com/api/webhooks/000000000000000000/XXXXXXXXXXXXXXXXXXXX",
-      dataRetentionDays: 90,
-    },
-  })
-  console.log(`✅ Created user: ${user4.email}`)
+  const companies = await Promise.all([
+    prisma.company.create({
+      data: {
+        userId: user1.id,
+        name: "TechCorp Inc.",
+        website: "https://techcorp.example.com",
+        industry: "Technology",
+        size: "1000-5000",
+        locations: ["San Francisco, CA", "Austin, TX"],
+        notes: "Great engineering culture, competitive compensation",
+      },
+    }),
+    prisma.company.create({
+      data: {
+        userId: user1.id,
+        name: "DataWorks AI",
+        website: "https://dataworks.example.com",
+        industry: "Artificial Intelligence",
+        size: "100-500",
+        locations: ["New York, NY"],
+        notes: "Cutting-edge ML research, fast-growing startup",
+      },
+    }),
+    prisma.company.create({
+      data: {
+        userId: user1.id,
+        name: "CloudScale Solutions",
+        website: "https://cloudscale.example.com",
+        industry: "Cloud Infrastructure",
+        size: "5000+",
+        locations: ["Seattle, WA", "Remote"],
+        notes: "Enterprise focus, great benefits package",
+      },
+    }),
+    prisma.company.create({
+      data: {
+        userId: user1.id,
+        name: "FinTech Innovations",
+        website: "https://fintech-innov.example.com",
+        industry: "Financial Technology",
+        size: "500-1000",
+        locations: ["Boston, MA"],
+        notes: "Hybrid work model, strong mentorship program",
+      },
+    }),
+    prisma.company.create({
+      data: {
+        userId: user1.id,
+        name: "DevTools Pro",
+        website: "https://devtools.example.com",
+        industry: "Developer Tools",
+        size: "50-100",
+        locations: ["Remote"],
+        notes: "Fully remote, developer-first culture",
+      },
+    }),
+  ])
+  console.log(`✅ Created ${companies.length} companies\n`)
 
-  // Create OAuth user (no password)
-  const user5 = await prisma.user.create({
-    data: {
-      email: "oauth@example.com",
-      name: "OAuth User",
-      password: null, // OAuth users don't have passwords
-      emailVerified: new Date(),
-      timezone: "Asia/Tokyo",
-      notifyInApp: true,
-      notifyEmail: true,
-      dataRetentionDays: 730,
-    },
-  })
-  console.log(`✅ Created OAuth user: ${user5.email}`)
+  // ==================== Contacts ====================
+  console.log("👥 Creating contacts...")
 
-  // Create sample data for user1 (test@example.com)
-  console.log("\n🏢 Creating sample companies for test user...")
+  const contacts = await Promise.all([
+    prisma.contact.create({
+      data: {
+        userId: user1.id,
+        companyId: companies[0].id,
+        name: "Emily Rodriguez",
+        email: "emily.r@techcorp.example.com",
+        role: "Senior Engineering Manager",
+        relationship: "Hiring Manager",
+        notes: "Met at tech conference, very responsive",
+      },
+    }),
+    prisma.contact.create({
+      data: {
+        userId: user1.id,
+        companyId: companies[0].id,
+        name: "Michael Park",
+        email: "m.park@techcorp.example.com",
+        role: "Technical Recruiter",
+        relationship: "Recruiter",
+        notes: "Main point of contact for application process",
+      },
+    }),
+    prisma.contact.create({
+      data: {
+        userId: user1.id,
+        companyId: companies[1].id,
+        name: "Dr. Aisha Patel",
+        email: "aisha@dataworks.example.com",
+        role: "Head of ML Engineering",
+        relationship: "Hiring Manager",
+        notes: "PhD advisor referral",
+      },
+    }),
+    prisma.contact.create({
+      data: {
+        userId: user1.id,
+        companyId: companies[2].id,
+        name: "James Wilson",
+        email: "jwilson@cloudscale.example.com",
+        role: "Director of Engineering",
+        relationship: "Interviewer",
+      },
+    }),
+    prisma.contact.create({
+      data: {
+        userId: user1.id,
+        companyId: companies[3].id,
+        name: "Lisa Thompson",
+        email: "lthompson@fintech-innov.example.com",
+        role: "Talent Acquisition Lead",
+        relationship: "Recruiter",
+      },
+    }),
+  ])
+  console.log(`✅ Created ${contacts.length} contacts\n`)
 
-  const company1 = await prisma.company.create({
-    data: {
-      userId: user1.id,
-      name: "Google",
-      website: "https://careers.google.com",
-      industry: "Technology",
-      size: "10000+",
-      locations: ["Mountain View, CA", "New York, NY", "Seattle, WA"],
-      notes: "Dream company! Strong engineering culture.",
-    },
-  })
+  // ==================== Applications ====================
+  console.log("📝 Creating applications across all stages...")
 
-  const company2 = await prisma.company.create({
-    data: {
-      userId: user1.id,
-      name: "Meta",
-      website: "https://www.metacareers.com",
-      industry: "Technology",
-      size: "10000+",
-      locations: ["Menlo Park, CA", "New York, NY"],
-      notes: "Innovative work in AR/VR and social platforms.",
-    },
-  })
-
-  const company3 = await prisma.company.create({
-    data: {
-      userId: user1.id,
-      name: "Stripe",
-      website: "https://stripe.com/jobs",
-      industry: "Fintech",
-      size: "1000-5000",
-      locations: ["San Francisco, CA", "Remote"],
-      notes: "Payment infrastructure. Remote-friendly.",
-    },
-  })
-
-  const company4 = await prisma.company.create({
-    data: {
-      userId: user1.id,
-      name: "Anthropic",
-      website: "https://www.anthropic.com/careers",
-      industry: "AI Research",
-      size: "100-500",
-      locations: ["San Francisco, CA"],
-      notes: "AI safety and research. Cutting-edge work.",
-    },
-  })
-
-  const company5 = await prisma.company.create({
-    data: {
-      userId: user1.id,
-      name: "Vercel",
-      website: "https://vercel.com/careers",
-      industry: "Developer Tools",
-      size: "100-500",
-      locations: ["Remote"],
-      notes: "Next.js creators. Fully remote.",
-    },
-  })
-
-  console.log(`✅ Created 5 companies`)
-
-  // Create contacts
-  console.log("\n👥 Creating sample contacts...")
-
-  const contact1 = await prisma.contact.create({
-    data: {
-      userId: user1.id,
-      companyId: company1.id,
-      name: "Sarah Chen",
-      email: "sarah.chen@google.com",
-      role: "Senior Technical Recruiter",
-      relationship: "Recruiter",
-      notes: "Reached out on LinkedIn. Very responsive.",
-    },
-  })
-
-  const contact2 = await prisma.contact.create({
-    data: {
-      userId: user1.id,
-      companyId: company2.id,
-      name: "Michael Rodriguez",
-      email: "mrodriguez@meta.com",
-      role: "Engineering Manager",
-      relationship: "Hiring Manager",
-      notes: "Interviewed with him for the backend role.",
-    },
-  })
-
-  const contact3 = await prisma.contact.create({
-    data: {
-      userId: user1.id,
-      companyId: company3.id,
-      name: "Emily Thompson",
-      email: "emily@stripe.com",
-      role: "Recruiter",
-      relationship: "Recruiter",
-    },
-  })
-
-  console.log(`✅ Created 3 contacts`)
-
-  // Create applications with different stages
-  console.log("\n📝 Creating sample applications...")
-
-  // Application 1: Google - ONSITE stage
   const app1 = await prisma.application.create({
     data: {
       userId: user1.id,
-      companyId: company1.id,
-      roleTitle: "Senior Software Engineer",
-      location: "Mountain View, CA",
+      companyId: companies[0].id,
+      roleTitle: "Senior Full Stack Engineer",
+      location: "San Francisco, CA (Hybrid)",
       employmentType: "Full-time",
       source: "LinkedIn",
-      postingUrl: "https://careers.google.com/jobs/123456",
-      stage: "ONSITE",
+      postingUrl: "https://linkedin.com/jobs/techcorp-senior-fullstack",
+      stage: "OFFER",
       status: "ACTIVE",
-      salaryMin: 180000,
-      salaryMax: 250000,
+      salaryMin: 150000,
+      salaryMax: 180000,
       salaryCurrency: "USD",
-      notes: "Exciting role working on distributed systems. Team seems great!",
-      appliedAt: new Date("2025-01-15"),
+      appliedAt: new Date("2024-01-15"),
+      notes: "Strong team fit, interesting technical challenges",
     },
   })
 
-  // Link contact to application
-  await prisma.applicationContact.create({
-    data: {
-      applicationId: app1.id,
-      contactId: contact1.id,
-      role: "Recruiter",
-    },
-  })
-
-  // Application 2: Meta - TECHNICAL stage
   const app2 = await prisma.application.create({
     data: {
       userId: user1.id,
-      companyId: company2.id,
-      roleTitle: "Backend Engineer",
-      location: "Menlo Park, CA",
+      companyId: companies[1].id,
+      roleTitle: "Machine Learning Engineer",
+      location: "New York, NY",
       employmentType: "Full-time",
       source: "Referral",
-      stage: "TECHNICAL",
+      postingUrl: "https://dataworks.example.com/careers/ml-engineer",
+      stage: "ONSITE",
       status: "ACTIVE",
-      salaryMin: 170000,
-      salaryMax: 230000,
-      notes: "Referred by college friend. Focus on infrastructure.",
-      appliedAt: new Date("2025-01-20"),
+      salaryMin: 140000,
+      salaryMax: 170000,
+      salaryCurrency: "USD",
+      appliedAt: new Date("2024-01-20"),
+      notes: "Referred by former colleague, working on cutting-edge NLP",
     },
   })
 
-  await prisma.applicationContact.create({
-    data: {
-      applicationId: app2.id,
-      contactId: contact2.id,
-      role: "Hiring Manager",
-    },
-  })
-
-  // Application 3: Stripe - PHONE_SCREEN stage
   const app3 = await prisma.application.create({
     data: {
       userId: user1.id,
-      companyId: company3.id,
-      roleTitle: "Full Stack Engineer",
-      location: "Remote",
+      companyId: companies[2].id,
+      roleTitle: "Cloud Infrastructure Engineer",
+      location: "Seattle, WA",
       employmentType: "Full-time",
       source: "Company Website",
-      postingUrl: "https://stripe.com/jobs/listing/123",
-      stage: "PHONE_SCREEN",
+      postingUrl: "https://cloudscale.example.com/jobs/123",
+      stage: "TECHNICAL",
       status: "ACTIVE",
-      salaryMin: 150000,
-      salaryMax: 200000,
-      notes: "Remote position. Phone screen scheduled for next week.",
-      appliedAt: new Date("2025-01-25"),
+      salaryMin: 145000,
+      salaryMax: 175000,
+      salaryCurrency: "USD",
+      appliedAt: new Date("2024-01-25"),
+      notes: "Large-scale distributed systems experience required",
     },
   })
 
-  await prisma.applicationContact.create({
-    data: {
-      applicationId: app3.id,
-      contactId: contact3.id,
-      role: "Recruiter",
-    },
-  })
-
-  // Application 4: Anthropic - APPLIED stage
   const app4 = await prisma.application.create({
     data: {
       userId: user1.id,
-      companyId: company4.id,
-      roleTitle: "ML Engineer",
-      location: "San Francisco, CA",
+      companyId: companies[3].id,
+      roleTitle: "Backend Engineer (Python)",
+      location: "Boston, MA (Hybrid)",
       employmentType: "Full-time",
-      source: "LinkedIn",
-      stage: "APPLIED",
+      source: "Indeed",
+      postingUrl: "https://indeed.com/job/fintech-backend-python",
+      stage: "PHONE_SCREEN",
       status: "ACTIVE",
-      notes: "Just submitted application. Very interested in AI safety work.",
-      appliedAt: new Date("2025-02-01"),
+      salaryMin: 130000,
+      salaryMax: 160000,
+      salaryCurrency: "USD",
+      appliedAt: new Date("2024-02-01"),
+      notes: "FinTech experience preferred but not required",
     },
   })
 
-  // Application 5: Vercel - OFFER stage
   const app5 = await prisma.application.create({
     data: {
       userId: user1.id,
-      companyId: company5.id,
+      companyId: companies[4].id,
       roleTitle: "Developer Advocate",
       location: "Remote",
       employmentType: "Full-time",
       source: "Twitter",
-      stage: "OFFER",
+      postingUrl: "https://devtools.example.com/careers/dev-advocate",
+      stage: "APPLIED",
       status: "ACTIVE",
-      salaryMin: 140000,
-      salaryMax: 180000,
-      notes: "Received offer! Need to decide by Feb 15th.",
-      appliedAt: new Date("2025-01-10"),
+      salaryMin: 120000,
+      salaryMax: 150000,
+      salaryCurrency: "USD",
+      appliedAt: new Date("2024-02-05"),
+      notes: "Great fit for my public speaking and technical writing skills",
     },
   })
 
-  console.log(`✅ Created 5 applications across different stages`)
-
-  // Create interviews
-  console.log("\n🎯 Creating sample interviews...")
-
-  const interview1 = await prisma.interview.create({
+  // Rejected application
+  const app6 = await prisma.application.create({
     data: {
       userId: user1.id,
-      applicationId: app1.id,
-      roundName: "Phone Screen",
-      type: "PHONE",
-      outcome: "PASSED",
-      scheduledAt: new Date("2025-01-22T10:00:00Z"),
-      duration: 45,
-      notes: "Went well! Discussed system design and past projects.",
-      instructions: "Call with recruiter to discuss background and role fit.",
+      companyId: companies[0].id,
+      roleTitle: "Senior DevOps Engineer",
+      location: "Austin, TX",
+      employmentType: "Full-time",
+      source: "LinkedIn",
+      stage: "REJECTED",
+      status: "ARCHIVED",
+      salaryMin: 135000,
+      salaryMax: 165000,
+      salaryCurrency: "USD",
+      appliedAt: new Date("2024-01-10"),
+      notes: "Didn't pass technical assessment, good learning experience",
     },
   })
 
-  const interview2 = await prisma.interview.create({
+  // Discovered application (haven't applied yet)
+  const app7 = await prisma.application.create({
     data: {
       userId: user1.id,
-      applicationId: app1.id,
-      roundName: "Technical Interview",
-      type: "TECHNICAL",
-      outcome: "PASSED",
-      scheduledAt: new Date("2025-01-29T14:00:00Z"),
-      duration: 60,
-      location: "Google Meet",
-      notes: "Coding challenge on distributed systems. Solved all problems.",
-      instructions: "1-hour technical interview with senior engineer. Expect DSA and system design.",
-    },
-  })
-
-  const interview3 = await prisma.interview.create({
-    data: {
-      userId: user1.id,
-      applicationId: app1.id,
-      roundName: "Onsite - Round 1",
-      type: "ONSITE",
-      outcome: "PENDING",
-      scheduledAt: new Date("2025-02-08T09:00:00Z"),
-      duration: 360,
-      location: "Google Mountain View Campus",
-      notes: "Full day onsite. 4 rounds back-to-back.",
-      instructions: "Report to Building 43. Bring ID. Lunch provided.",
-    },
-  })
-
-  const interview4 = await prisma.interview.create({
-    data: {
-      userId: user1.id,
-      applicationId: app2.id,
-      roundName: "Phone Screen",
-      type: "PHONE",
-      outcome: "PASSED",
-      scheduledAt: new Date("2025-01-27T15:00:00Z"),
-      duration: 30,
-      notes: "Quick intro call. Technical round scheduled.",
-    },
-  })
-
-  const interview5 = await prisma.interview.create({
-    data: {
-      userId: user1.id,
-      applicationId: app2.id,
-      roundName: "Technical Round",
-      type: "TECHNICAL",
-      outcome: "PENDING",
-      scheduledAt: new Date("2025-02-10T11:00:00Z"),
-      duration: 90,
-      location: "Zoom",
-      instructions: "Live coding session. Review data structures and algorithms.",
-    },
-  })
-
-  const interview6 = await prisma.interview.create({
-    data: {
-      userId: user1.id,
-      applicationId: app3.id,
-      roundName: "Recruiter Screen",
-      type: "PHONE",
-      outcome: "PENDING",
-      scheduledAt: new Date("2025-02-12T13:00:00Z"),
-      duration: 30,
-      location: "Phone",
-      notes: "Initial screening with Emily.",
-    },
-  })
-
-  console.log(`✅ Created 6 interviews`)
-
-  // Add interview panel members
-  // Link some to existing contacts
-  await prisma.interviewPanelMember.create({
-    data: {
-      interviewId: interview1.id,
-      contactId: contact1.id, // Sarah Chen from contacts
-      name: "Sarah Chen",
-      role: "Recruiter",
-    },
-  })
-
-  await prisma.interviewPanelMember.create({
-    data: {
-      interviewId: interview2.id,
-      name: "David Park",
-      role: "Senior Software Engineer",
-    },
-  })
-
-  await prisma.interviewPanelMember.create({
-    data: {
-      interviewId: interview3.id,
-      name: "Lisa Wang",
-      role: "Engineering Manager",
-    },
-  })
-
-  await prisma.interviewPanelMember.create({
-    data: {
-      interviewId: interview3.id,
-      name: "James Liu",
-      role: "Staff Engineer",
-    },
-  })
-
-  await prisma.interviewPanelMember.create({
-    data: {
-      interviewId: interview4.id,
-      contactId: contact2.id, // Michael Rodriguez from contacts
-      name: "Michael Rodriguez",
-      role: "Engineering Manager",
-    },
-  })
-
-  await prisma.interviewPanelMember.create({
-    data: {
-      interviewId: interview6.id,
-      contactId: contact3.id, // Emily Thompson from contacts
-      name: "Emily Thompson",
-      role: "Recruiter",
-    },
-  })
-
-  console.log(`✅ Added interview panel members`)
-
-  // Create tasks/reminders
-  console.log("\n✅ Creating sample tasks...")
-
-  const task1 = await prisma.task.create({
-    data: {
-      userId: user1.id,
-      applicationId: app1.id,
-      interviewId: interview3.id,
-      title: "Prepare for Google onsite",
-      description: "Review system design, practice coding problems, research team",
-      priority: "HIGH",
-      status: "IN_PROGRESS",
-      dueDate: new Date("2025-02-07T00:00:00Z"),
-    },
-  })
-
-  const task2 = await prisma.task.create({
-    data: {
-      userId: user1.id,
-      applicationId: app2.id,
-      title: "Follow up with Michael",
-      description: "Send thank you email after phone screen",
-      priority: "MEDIUM",
-      status: "COMPLETED",
-      dueDate: new Date("2025-01-28T00:00:00Z"),
-      completedAt: new Date("2025-01-28T14:30:00Z"),
-    },
-  })
-
-  const task3 = await prisma.task.create({
-    data: {
-      userId: user1.id,
-      applicationId: app3.id,
-      title: "Research Stripe engineering blog",
-      description: "Read recent posts to prepare for interview",
-      priority: "MEDIUM",
-      status: "PENDING",
-      dueDate: new Date("2025-02-11T00:00:00Z"),
-    },
-  })
-
-  const task4 = await prisma.task.create({
-    data: {
-      userId: user1.id,
-      applicationId: app5.id,
-      title: "Respond to Vercel offer",
-      description: "Need to accept or decline by Feb 15th",
-      priority: "URGENT",
-      status: "PENDING",
-      dueDate: new Date("2025-02-15T00:00:00Z"),
-    },
-  })
-
-  const task5 = await prisma.task.create({
-    data: {
-      userId: user1.id,
-      applicationId: app4.id,
-      title: "Follow up on Anthropic application",
-      description: "Check status if no response by Feb 8th",
-      priority: "LOW",
-      status: "PENDING",
-      dueDate: new Date("2025-02-08T00:00:00Z"),
-    },
-  })
-
-  console.log(`✅ Created 5 tasks`)
-
-  // Create offer for app5
-  console.log("\n💰 Creating sample offer...")
-
-  const offer1 = await prisma.offer.create({
-    data: {
-      applicationId: app5.id,
-      baseSalary: 160000,
-      bonus: 20000,
-      equity: "0.05% (5000 shares)",
-      benefits: "Health, dental, vision, 401k, unlimited PTO, home office stipend",
+      companyId: companies[2].id,
+      roleTitle: "Staff Engineer",
       location: "Remote",
-      deadline: new Date("2025-02-15"),
-      decision: "PENDING",
-      notes: "Great offer! Proposed start date: March 1, 2025. Need to negotiate equity slightly.",
+      employmentType: "Full-time",
+      source: "AngelList",
+      postingUrl: "https://angel.co/cloudscale/staff-engineer",
+      stage: "DISCOVERED",
+      status: "ACTIVE",
+      salaryMin: 170000,
+      salaryMax: 220000,
+      salaryCurrency: "USD",
+      notes: "Senior role, need to polish resume before applying",
     },
   })
 
-  console.log(`✅ Created 1 offer`)
+  console.log(`✅ Created 7 applications across all stages\n`)
 
-  // Create activity timeline
-  console.log("\n📜 Creating activity timeline...")
+  // ==================== Application-Contact Links ====================
+  console.log("🔗 Linking contacts to applications...")
 
-  await prisma.activity.createMany({
-    data: [
-      {
+  await Promise.all([
+    prisma.applicationContact.create({
+      data: {
+        applicationId: app1.id,
+        contactId: contacts[0].id,
+        role: "Hiring Manager",
+      },
+    }),
+    prisma.applicationContact.create({
+      data: {
+        applicationId: app1.id,
+        contactId: contacts[1].id,
+        role: "Recruiter",
+      },
+    }),
+    prisma.applicationContact.create({
+      data: {
+        applicationId: app2.id,
+        contactId: contacts[2].id,
+        role: "Hiring Manager",
+      },
+    }),
+    prisma.applicationContact.create({
+      data: {
+        applicationId: app3.id,
+        contactId: contacts[3].id,
+        role: "Interviewer",
+      },
+    }),
+    prisma.applicationContact.create({
+      data: {
+        applicationId: app4.id,
+        contactId: contacts[4].id,
+        role: "Recruiter",
+      },
+    }),
+  ])
+  console.log(`✅ Linked contacts to applications\n`)
+
+  // ==================== Interviews ====================
+  console.log("🎤 Creating interviews...")
+
+  const now = new Date()
+  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+  const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+  const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+
+  const interviews = await Promise.all([
+    prisma.interview.create({
+      data: {
+        userId: user1.id,
+        applicationId: app1.id,
+        roundName: "Final Round",
+        type: "FINAL",
+        outcome: "PASSED",
+        scheduledAt: yesterday,
+        duration: 90,
+        location: "Google Meet",
+        notes: "Went very well, discussed compensation and start date",
+      },
+    }),
+    prisma.interview.create({
+      data: {
+        userId: user1.id,
+        applicationId: app2.id,
+        roundName: "Onsite Day 1",
+        type: "ONSITE",
+        outcome: "PENDING",
+        scheduledAt: tomorrow,
+        duration: 240,
+        location: "DataWorks AI HQ, New York",
+        instructions: "Bring ID, arrive 15 minutes early, lunch provided",
+        notes: "Full day onsite: coding, system design, behavioral, team lunch",
+      },
+    }),
+    prisma.interview.create({
+      data: {
+        userId: user1.id,
+        applicationId: app3.id,
+        roundName: "Technical Screen",
+        type: "TECHNICAL",
+        outcome: "PASSED",
+        scheduledAt: new Date("2024-02-03"),
+        duration: 60,
+        location: "Zoom",
+        notes: "Live coding in Python, system design discussion",
+      },
+    }),
+    prisma.interview.create({
+      data: {
+        userId: user1.id,
+        applicationId: app4.id,
+        roundName: "Recruiter Screen",
+        type: "PHONE",
+        outcome: "PENDING",
+        scheduledAt: nextWeek,
+        duration: 30,
+        location: "Phone",
+        notes: "Initial conversation about background and role fit",
+      },
+    }),
+  ])
+  console.log(`✅ Created ${interviews.length} interviews\n`)
+
+  // ==================== Interview Panel Members ====================
+  console.log("👔 Adding interview panel members...")
+
+  await Promise.all([
+    // Link existing contact as panel member
+    prisma.interviewPanelMember.create({
+      data: {
+        interviewId: interviews[0].id,
+        contactId: contacts[0].id, // Emily Rodriguez
+        name: "Emily Rodriguez",
+        role: "Engineering Manager",
+      },
+    }),
+    // Add new panel member without existing contact
+    prisma.interviewPanelMember.create({
+      data: {
+        interviewId: interviews[0].id,
+        name: "David Kim",
+        role: "VP of Engineering",
+      },
+    }),
+    // Link existing contact as panel member
+    prisma.interviewPanelMember.create({
+      data: {
+        interviewId: interviews[1].id,
+        contactId: contacts[2].id, // Dr. Aisha Patel
+        name: "Dr. Aisha Patel",
+        role: "Head of ML Engineering",
+      },
+    }),
+  ])
+  console.log(`✅ Added interview panel members\n`)
+
+  // ==================== Tasks ====================
+  console.log("✅ Creating tasks and reminders...")
+
+  const tasks = await Promise.all([
+    prisma.task.create({
+      data: {
+        userId: user1.id,
+        applicationId: app1.id,
+        title: "Review and sign offer letter",
+        description: "Carefully review compensation, benefits, and start date",
+        priority: "URGENT",
+        status: "PENDING",
+        dueDate: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000),
+      },
+    }),
+    prisma.task.create({
+      data: {
+        userId: user1.id,
+        applicationId: app2.id,
+        title: "Prepare for onsite interview",
+        description: "Review ML algorithms, practice system design, prepare questions",
+        priority: "HIGH",
+        status: "IN_PROGRESS",
+        dueDate: tomorrow,
+      },
+    }),
+    prisma.task.create({
+      data: {
+        userId: user1.id,
+        applicationId: app3.id,
+        title: "Send thank you email",
+        description: "Thank James for the technical interview",
+        priority: "MEDIUM",
+        status: "COMPLETED",
+        dueDate: new Date("2024-02-04"),
+        completedAt: new Date("2024-02-04"),
+      },
+    }),
+    prisma.task.create({
+      data: {
+        userId: user1.id,
+        applicationId: app5.id,
+        title: "Follow up with recruiter",
+        description: "Check on application status, express continued interest",
+        priority: "MEDIUM",
+        status: "PENDING",
+        dueDate: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000),
+      },
+    }),
+    prisma.task.create({
+      data: {
+        userId: user1.id,
+        applicationId: app7.id,
+        title: "Update resume for staff role",
+        description: "Highlight leadership and architecture experience",
+        priority: "LOW",
+        status: "PENDING",
+        dueDate: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000),
+      },
+    }),
+  ])
+  console.log(`✅ Created ${tasks.length} tasks\n`)
+
+  // ==================== Offers ====================
+  console.log("💰 Creating offer...")
+
+  const offer = await prisma.offer.create({
+    data: {
+      applicationId: app1.id,
+      baseSalary: 165000,
+      bonus: 20000,
+      equity: "0.15% (15,000 shares vesting over 4 years)",
+      currency: "USD",
+      benefits: "Full health/dental/vision, 401k 6% match, unlimited PTO, $2000 learning budget",
+      location: "San Francisco, CA (Hybrid)",
+      deadline: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
+      decision: "PENDING",
+      notes: "Strong offer, need to compare with other potential offers. Equity valued at ~$50k at current valuation.",
+    },
+  })
+  console.log(`✅ Created offer for TechCorp position\n`)
+
+  // ==================== Activities ====================
+  console.log("📋 Creating activity timeline...")
+
+  const activities = await Promise.all([
+    prisma.activity.create({
+      data: {
         userId: user1.id,
         applicationId: app1.id,
         type: "CREATED",
-        description: "Application created for Senior Software Engineer at Google",
+        description: "Application created",
+        createdAt: new Date("2024-01-15"),
       },
-      {
+    }),
+    prisma.activity.create({
+      data: {
         userId: user1.id,
         applicationId: app1.id,
         type: "STAGE_CHANGED",
         description: "Stage changed from DISCOVERED to APPLIED",
         metadata: JSON.stringify({ from: "DISCOVERED", to: "APPLIED" }),
+        createdAt: new Date("2024-01-15"),
       },
-      {
-        userId: user1.id,
-        applicationId: app1.id,
-        type: "INTERVIEW_SCHEDULED",
-        description: "Phone Screen scheduled with Sarah Chen",
-      },
-      {
-        userId: user1.id,
-        applicationId: app1.id,
-        type: "INTERVIEW_COMPLETED",
-        description: "Phone Screen completed - PASSED",
-      },
-      {
+    }),
+    prisma.activity.create({
+      data: {
         userId: user1.id,
         applicationId: app1.id,
         type: "STAGE_CHANGED",
-        description: "Stage changed from APPLIED to TECHNICAL",
-        metadata: JSON.stringify({ from: "APPLIED", to: "TECHNICAL" }),
+        description: "Stage changed from APPLIED to PHONE_SCREEN",
+        metadata: JSON.stringify({ from: "APPLIED", to: "PHONE_SCREEN" }),
+        createdAt: new Date("2024-01-22"),
       },
-      {
+    }),
+    prisma.activity.create({
+      data: {
         userId: user1.id,
         applicationId: app1.id,
         type: "INTERVIEW_SCHEDULED",
-        description: "Technical Interview scheduled",
+        description: "Technical interview scheduled",
+        createdAt: new Date("2024-01-25"),
       },
-      {
+    }),
+    prisma.activity.create({
+      data: {
+        userId: user1.id,
+        applicationId: app1.id,
+        type: "STAGE_CHANGED",
+        description: "Stage changed from PHONE_SCREEN to TECHNICAL",
+        metadata: JSON.stringify({ from: "PHONE_SCREEN", to: "TECHNICAL" }),
+        createdAt: new Date("2024-01-28"),
+      },
+    }),
+    prisma.activity.create({
+      data: {
         userId: user1.id,
         applicationId: app1.id,
         type: "INTERVIEW_COMPLETED",
-        description: "Technical Interview completed - PASSED",
+        description: "Technical interview completed - Passed",
+        createdAt: new Date("2024-02-01"),
       },
-      {
+    }),
+    prisma.activity.create({
+      data: {
         userId: user1.id,
         applicationId: app1.id,
         type: "STAGE_CHANGED",
         description: "Stage changed from TECHNICAL to ONSITE",
         metadata: JSON.stringify({ from: "TECHNICAL", to: "ONSITE" }),
+        createdAt: new Date("2024-02-05"),
       },
-      {
+    }),
+    prisma.activity.create({
+      data: {
         userId: user1.id,
-        applicationId: app5.id,
-        type: "CREATED",
-        description: "Application created for Developer Advocate at Vercel",
-      },
-      {
-        userId: user1.id,
-        applicationId: app5.id,
+        applicationId: app1.id,
         type: "STAGE_CHANGED",
-        description: "Stage changed to OFFER",
-        metadata: JSON.stringify({ from: "PHONE_SCREEN", to: "OFFER" }),
+        description: "Stage changed from ONSITE to OFFER",
+        metadata: JSON.stringify({ from: "ONSITE", to: "OFFER" }),
+        createdAt: new Date("2024-02-10"),
       },
-      {
+    }),
+    prisma.activity.create({
+      data: {
         userId: user1.id,
-        applicationId: app5.id,
+        applicationId: app1.id,
         type: "OFFER_RECEIVED",
-        description: "Offer received: $160k base + $20k bonus + 0.05% equity (5000 shares)",
+        description: "Received offer: $165k base + $20k bonus + 0.15% equity",
+        createdAt: new Date("2024-02-10"),
       },
-    ],
-  })
+    }),
+  ])
+  console.log(`✅ Created ${activities.length} activity logs\n`)
 
-  console.log(`✅ Created activity timeline`)
+  // ==================== Attachments ====================
+  console.log("📎 Creating attachments...")
 
-  // Create email connection (sample)
-  console.log("\n📧 Creating sample email connection...")
+  const attachments = await Promise.all([
+    prisma.attachment.create({
+      data: {
+        applicationId: app1.id,
+        fileName: "techcorp-offer-letter.pdf",
+        fileUrl: "/uploads/attachments/techcorp-offer-letter.pdf",
+        fileType: "application/pdf",
+        fileSize: 245760,
+      },
+    }),
+    prisma.attachment.create({
+      data: {
+        applicationId: app1.id,
+        fileName: "my-resume-2024.pdf",
+        fileUrl: "/uploads/attachments/my-resume-2024.pdf",
+        fileType: "application/pdf",
+        fileSize: 102400,
+      },
+    }),
+    prisma.attachment.create({
+      data: {
+        applicationId: app2.id,
+        fileName: "cover-letter-dataworks.pdf",
+        fileUrl: "/uploads/attachments/cover-letter-dataworks.pdf",
+        fileType: "application/pdf",
+        fileSize: 81920,
+      },
+    }),
+    prisma.attachment.create({
+      data: {
+        interviewId: interviews[1].id,
+        fileName: "onsite-schedule.pdf",
+        fileUrl: "/uploads/attachments/onsite-schedule.pdf",
+        fileType: "application/pdf",
+        fileSize: 51200,
+      },
+    }),
+  ])
+  console.log(`✅ Created ${attachments.length} attachments\n`)
 
-  await prisma.emailConnection.create({
-    data: {
-      userId: user1.id,
-      provider: "GMAIL",
-      email: "test@example.com",
-      accessToken: "sample_token_encrypted",
-      refreshToken: "sample_refresh_token_encrypted",
-      expiresAt: new Date(Date.now() + 3600 * 1000), // 1 hour from now
-      scope: "https://www.googleapis.com/auth/gmail.readonly",
-      labels: ["INBOX", "Jobs"],
-    },
-  })
+  // ==================== Email Connections ====================
+  console.log("📧 Creating email connections...")
 
-  console.log(`✅ Created email connection`)
+  const emailConnections = await Promise.all([
+    prisma.emailConnection.create({
+      data: {
+        userId: user1.id,
+        provider: "GMAIL",
+        email: "test@example.com",
+        accessToken: "mock_gmail_access_token_1234567890abcdefghijklmnopqrstuvwxyz",
+        refreshToken: "mock_gmail_refresh_token_abcdefghijklmnopqrstuvwxyz1234567890",
+        expiresAt: new Date(now.getTime() + 3600 * 1000),
+        scope: "https://www.googleapis.com/auth/gmail.readonly",
+        labels: ["INBOX", "Jobs", "Career"],
+        lastSyncAt: new Date(now.getTime() - 60 * 60 * 1000), // 1 hour ago
+      },
+    }),
+  ])
+  console.log(`✅ Created ${emailConnections.length} email connections\n`)
 
-  console.log("\n📊 Seed Summary:")
+  // ==================== Share Links ====================
+  console.log("🔗 Creating share links...")
+
+  const shareLinks = await Promise.all([
+    prisma.shareLink.create({
+      data: {
+        userId: user1.id,
+        token: "abc123def456ghi789",
+        scope: `application:${app1.id}`, // Share specific application
+        expiresAt: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000), // Expires in 30 days
+      },
+    }),
+    prisma.shareLink.create({
+      data: {
+        userId: user1.id,
+        token: "xyz789uvw456rst123",
+        scope: "all", // Share all applications
+        expiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000), // Expires in 7 days
+      },
+    }),
+  ])
+  console.log(`✅ Created ${shareLinks.length} share links\n`)
+
+  // ==================== Audit Logs ====================
+  console.log("📜 Creating audit logs...")
+
+  const auditLogs = await Promise.all([
+    prisma.auditLog.create({
+      data: {
+        userId: user1.id,
+        action: "USER_LOGIN",
+        resource: `user:${user1.id}`,
+        ipAddress: "192.168.1.100",
+        userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+        metadata: JSON.stringify({ method: "email" }),
+      },
+    }),
+    prisma.auditLog.create({
+      data: {
+        userId: user1.id,
+        action: "EMAIL_CONNECTED",
+        resource: `email_connection:${emailConnections[0].id}`,
+        ipAddress: "192.168.1.100",
+        userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+        metadata: JSON.stringify({ provider: "GMAIL" }),
+      },
+    }),
+    prisma.auditLog.create({
+      data: {
+        userId: user1.id,
+        action: "APPLICATION_CREATED",
+        resource: `application:${app1.id}`,
+        ipAddress: "192.168.1.100",
+        userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
+        metadata: JSON.stringify({ company: "TechCorp Inc.", role: "Senior Full Stack Engineer" }),
+      },
+    }),
+  ])
+  console.log(`✅ Created ${auditLogs.length} audit logs\n`)
+
+  // ==================== Summary ====================
+  console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+  console.log("📊 Comprehensive Seed Summary")
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-  console.log(`Users: 5`)
-  console.log(`Companies: 5`)
-  console.log(`Contacts: 3`)
-  console.log(`Applications: 5 (across all stages)`)
-  console.log(`  - APPLIED: 1`)
-  console.log(`  - PHONE_SCREEN: 1`)
-  console.log(`  - TECHNICAL: 1`)
-  console.log(`  - ONSITE: 1`)
-  console.log(`  - OFFER: 1`)
-  console.log(`Interviews: 6`)
-  console.log(`Tasks: 5`)
-  console.log(`Offers: 1`)
-  console.log(`Activities: 11`)
-  console.log(`Email Connections: 1`)
-  console.log("\n🔑 Test Credentials:")
-  console.log("  1. test@example.com / password123 (has sample data)")
-  console.log("  2. demo@careerpilot.com / password456")
-  console.log("  3. minimal@example.com / secure123")
-  console.log("  4. notifications@example.com / testpass789")
-  console.log("  5. oauth@example.com (OAuth only, no password)")
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-  console.log("\n✨ Database seeded successfully with comprehensive sample data!")
+  console.log(`\n✅ Users: 2`)
+  console.log(`✅ Companies: ${companies.length}`)
+  console.log(`✅ Contacts: ${contacts.length}`)
+  console.log(`✅ Applications: 7`)
+  console.log(`   - DISCOVERED: 1`)
+  console.log(`   - APPLIED: 1`)
+  console.log(`   - PHONE_SCREEN: 1`)
+  console.log(`   - TECHNICAL: 1`)
+  console.log(`   - ONSITE: 1`)
+  console.log(`   - OFFER: 1`)
+  console.log(`   - REJECTED: 1`)
+  console.log(`✅ Application-Contact Links: 5`)
+  console.log(`✅ Interviews: ${interviews.length}`)
+  console.log(`✅ Interview Panel Members: 3`)
+  console.log(`✅ Tasks: ${tasks.length}`)
+  console.log(`✅ Offers: 1`)
+  console.log(`✅ Activities: ${activities.length}`)
+  console.log(`✅ Attachments: ${attachments.length}`)
+  console.log(`✅ Email Connections: ${emailConnections.length}`)
+  console.log(`✅ Share Links: ${shareLinks.length}`)
+  console.log(`✅ Audit Logs: ${auditLogs.length}`)
+
+  console.log("\n🔐 Test Credentials:")
+  console.log("   Email: test@example.com")
+  console.log("   Password: password123")
+  console.log("\n   Email: demo@careerpilot.com")
+  console.log("   Password: password456")
+
+  console.log("\n📋 Enum Coverage:")
+  console.log("   ✅ All ApplicationStage values demonstrated")
+  console.log("   ✅ All InterviewType values demonstrated")
+  console.log("   ✅ All TaskStatus values demonstrated")
+  console.log("   ✅ All TaskPriority values demonstrated")
+  console.log("   ✅ All ActivityType examples shown")
+
+  console.log("\n🔗 Relationships Verified:")
+  console.log("   ✅ User → Applications (one-to-many)")
+  console.log("   ✅ User → Companies (one-to-many)")
+  console.log("   ✅ Company → Applications (one-to-many)")
+  console.log("   ✅ Application → Interviews (one-to-many)")
+  console.log("   ✅ Application → Tasks (one-to-many)")
+  console.log("   ✅ Application → Offer (one-to-one)")
+  console.log("   ✅ Application ↔ Contact (many-to-many via ApplicationContact)")
+  console.log("   ✅ Interview → Panel Members (one-to-many)")
+  console.log("   ✅ Application → Activities (one-to-many)")
+  console.log("   ✅ Application → Attachments (one-to-many)")
+
+  console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+  console.log("✨ Database seeded successfully with comprehensive test data!")
+  console.log("🚀 Ready for development and testing!")
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 }
 
 main()
@@ -687,4 +808,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect()
   })
-

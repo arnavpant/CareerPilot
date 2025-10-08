@@ -305,7 +305,6 @@ model Interview {
   user         User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
   application  Application            @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   panelMembers InterviewPanelMember[]
-  tasks        Task[]
   attachments  Attachment[]
 
   @@index([userId])
@@ -366,11 +365,9 @@ model Task {
   // Relations
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   application Application? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  interview   Interview?   @relation(fields: [interviewId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([applicationId])
-  @@index([interviewId])
   @@index([dueDate])
   @@index([status])
   @@map("tasks")
