@@ -30,15 +30,22 @@ export default function SettingsPage() {
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch("/api/settings")
+      const response = await fetch("/api/settings", {
+        credentials: "include", // Ensure cookies are sent
+      })
+      
       if (!response.ok) {
-        throw new Error("Failed to fetch settings")
+        const errorData = await response.json().catch(() => ({}))
+        console.error("Settings fetch error:", response.status, errorData)
+        throw new Error(errorData.error || `Failed to fetch settings (${response.status})`)
       }
+      
       const data = await response.json()
       setSettings(data)
     } catch (error) {
-      toast.error("Failed to load settings")
-      console.error(error)
+      const errorMessage = error instanceof Error ? error.message : "Failed to load settings"
+      toast.error(errorMessage)
+      console.error("Settings fetch failed:", error)
     } finally {
       setIsLoading(false)
     }
@@ -62,14 +69,28 @@ export default function SettingsPage() {
   if (!settings) {
     return (
       <div className="min-h-screen flex items-center justify-center p-8">
-        <div className="glass-card p-8 max-w-md w-full text-center">
-          <p className="text-white text-lg">Failed to load settings</p>
-          <button
-            onClick={fetchSettings}
-            className="mt-4 px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
-          >
-            Try Again
-          </button>
+        <div className="glass-card p-8 max-w-md w-full text-center space-y-4">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-red-500/20 flex items-center justify-center mb-4">
+            <SettingsIcon className="w-8 h-8 text-red-400" />
+          </div>
+          <h2 className="text-2xl font-bold text-white">Failed to Load Settings</h2>
+          <p className="text-slate-400">
+            There was a problem loading your settings. Please check the browser console for more details.
+          </p>
+          <div className="flex gap-3 justify-center mt-6">
+            <button
+              onClick={fetchSettings}
+              className="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={() => window.location.href = "/dashboard"}
+              className="px-6 py-2 bg-white/10 text-white rounded-xl font-semibold hover:bg-white/20 transition-all"
+            >
+              Back to Dashboard
+            </button>
+          </div>
         </div>
       </div>
     )
