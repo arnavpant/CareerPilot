@@ -10,16 +10,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Minimal User model for authentication (will be expanded in Task 2.0)
+// User model with settings (will be expanded further in Task 2.0)
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
   name          String
-  password      String?   // Null for OAuth users
+  password      String? // Null for OAuth users
   avatar        String?
   emailVerified DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+
+  // Settings
+  timezone String @default("UTC")
+
+  // Notification preferences
+  notifyInApp    Boolean @default(true)
+  notifyEmail    Boolean @default(true)
+  notifySlack    Boolean @default(false)
+  notifyDiscord  Boolean @default(false)
+  slackWebhook   String?
+  discordWebhook String?
+
+  // Data retention (in days, null = forever)
+  dataRetentionDays Int? @default(365)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("users")
 }
