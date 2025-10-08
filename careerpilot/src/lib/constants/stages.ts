@@ -71,4 +71,5 @@ export const STAGE_ORDER = [
   ApplicationStage.OFFER,
   ApplicationStage.ACCEPTED,
   ApplicationStage.REJECTED,
+  ApplicationStage.WITHDRAWN,
 ] as const
