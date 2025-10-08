@@ -8,7 +8,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <SessionProvider>
       {children}
       <Toaster 
-        position="top-right" 
+        position="bottom-right" 
         richColors 
         duration={5000}
         closeButton
