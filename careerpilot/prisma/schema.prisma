@@ -10,7 +10,95 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User model with settings (will be expanded further in Task 2.0)
+// ==========================================
+// ENUMS
+// ==========================================
+
+enum ApplicationStage {
+  DISCOVERED
+  APPLIED
+  PHONE_SCREEN
+  TECHNICAL
+  ONSITE
+  OFFER
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum ApplicationStatus {
+  ACTIVE
+  ARCHIVED
+  WITHDRAWN
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum InterviewType {
+  PHONE
+  TECHNICAL
+  BEHAVIORAL
+  ONSITE
+  FINAL
+  OTHER
+}
+
+enum InterviewOutcome {
+  PENDING
+  PASSED
+  FAILED
+  CANCELLED
+  NO_SHOW
+}
+
+enum OfferDecision {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum ActivityType {
+  CREATED
+  UPDATED
+  STAGE_CHANGED
+  STATUS_CHANGED
+  NOTE_ADDED
+  CONTACT_ADDED
+  INTERVIEW_SCHEDULED
+  INTERVIEW_COMPLETED
+  TASK_CREATED
+  TASK_COMPLETED
+  OFFER_RECEIVED
+  OFFER_ACCEPTED
+  OFFER_DECLINED
+  EMAIL_RECEIVED
+  EMAIL_SENT
+  ATTACHMENT_UPLOADED
+  APPLICATION_ARCHIVED
+  APPLICATION_WITHDRAWN
+}
+
+enum EmailProvider {
+  GMAIL
+  OUTLOOK
+}
+
+// ==========================================
+// USER MODEL (Authentication & Settings)
+// ==========================================
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -36,5 +124,408 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Relations
+  applications     Application[]
+  companies        Company[]
+  contacts         Contact[]
+  interviews       Interview[]
+  tasks            Task[]
+  activities       Activity[]
+  shareLinks       ShareLink[]
+  emailConnections EmailConnection[]
+  auditLogs        AuditLog[]
+
   @@map("users")
+}
+
+// ==========================================
+// COMPANY MODEL
+// ==========================================
+
+model Company {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  website   String?
+  industry  String?
+  size      String? // e.g., "1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"
+  locations String[] // Array of location strings
+  notes     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications Application[]
+  contacts     Contact[]
+
+  @@index([userId])
+  @@index([name])
+  @@map("companies")
+}
+
+// ==========================================
+// CONTACT MODEL
+// ==========================================
+
+model Contact {
+  id           String   @id @default(cuid())
+  userId       String
+  companyId    String?
+  name         String
+  email        String
+  role         String? // Job title/role at company
+  relationship String? // e.g., "Recruiter", "Hiring Manager", "Engineer"
+  notes        String?  @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company               Company?               @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  applicationContacts   ApplicationContact[]
+  interviewPanelMembers InterviewPanelMember[]
+
+  @@unique([userId, email]) // Dedupe by email per user
+  @@index([userId])
+  @@index([companyId])
+  @@index([email])
+  @@map("contacts")
+}
+
+// ==========================================
+// APPLICATION MODEL (Core entity)
+// ==========================================
+
+model Application {
+  id             String            @id @default(cuid())
+  userId         String
+  companyId      String
+  roleTitle      String
+  location       String?
+  employmentType String? // e.g., "Full-time", "Part-time", "Contract", "Internship"
+  source         String? // e.g., "LinkedIn", "Company Website", "Referral", "Indeed"
+  postingUrl     String?
+  stage          ApplicationStage  @default(DISCOVERED)
+  status         ApplicationStatus @default(ACTIVE)
+
+  // External tracking
+  externalAtsUrl        String?
+  externalApplicationId String?
+
+  // Application materials
+  resumeVersion String?
+  coverLetter   String? @db.Text
+
+  // Compensation
+  salaryMin      Int?
+  salaryMax      Int?
+  salaryCurrency String? @default("USD")
+
+  // Deadlines
+  offerDeadline DateTime?
+
+  // Notes and tags
+  notes String?  @db.Text
+  tags  String[] // Array of tag strings
+
+  // Stage tracking
+  discoveredAt DateTime?
+  appliedAt    DateTime?
+  phoneAt      DateTime?
+  techAt       DateTime?
+  onsiteAt     DateTime?
+  offerAt      DateTime?
+  acceptedAt   DateTime?
+  rejectedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company     Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  contacts    ApplicationContact[]
+  interviews  Interview[]
+  tasks       Task[]
+  offer       Offer?
+  activities  Activity[]
+  attachments Attachment[]
+
+  @@index([userId])
+  @@index([companyId])
+  @@index([stage])
+  @@index([status])
+  @@index([appliedAt])
+  @@map("applications")
+}
+
+// ==========================================
+// APPLICATION-CONTACT JUNCTION (Many-to-Many)
+// ==========================================
+
+model ApplicationContact {
+  id            String   @id @default(cuid())
+  applicationId String
+  contactId     String
+  role          String? // e.g., "Recruiter", "Hiring Manager", "Referral"
+  createdAt     DateTime @default(now())
+
+  // Relations
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  contact     Contact     @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@unique([applicationId, contactId])
+  @@index([applicationId])
+  @@index([contactId])
+  @@map("application_contacts")
+}
+
+// ==========================================
+// INTERVIEW MODEL
+// ==========================================
+
+model Interview {
+  id            String            @id @default(cuid())
+  userId        String
+  applicationId String
+  roundName     String // e.g., "Phone Screen", "Technical Round 1", "Onsite", "Final"
+  type          InterviewType?
+  scheduledAt   DateTime
+  duration      Int? // Duration in minutes
+  location      String? // Physical location or "Virtual"
+  virtualLink   String? // Zoom/Meet/Teams link
+  instructions  String?           @db.Text
+  outcome       InterviewOutcome? @default(PENDING)
+  notes         String?           @db.Text
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  // Relations
+  user         User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application  Application            @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  panelMembers InterviewPanelMember[]
+  attachments  Attachment[]
+
+  @@index([userId])
+  @@index([applicationId])
+  @@index([scheduledAt])
+  @@map("interviews")
+}
+
+// ==========================================
+// INTERVIEW PANEL MEMBER (Interviewers)
+// ==========================================
+
+model InterviewPanelMember {
+  id          String   @id @default(cuid())
+  interviewId String
+  contactId   String?
+  name        String // Store name even if no contact
+  role        String? // Their role/title
+  createdAt   DateTime @default(now())
+
+  // Relations
+  interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  contact   Contact?  @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@index([interviewId])
+  @@index([contactId])
+  @@map("interview_panel_members")
+}
+
+// ==========================================
+// TASK/REMINDER MODEL
+// ==========================================
+
+model Task {
+  id            String       @id @default(cuid())
+  userId        String
+  applicationId String?
+  interviewId   String? // Link to interview if interview-related
+  title         String
+  description   String?      @db.Text
+  dueDate       DateTime?
+  priority      TaskPriority @default(MEDIUM)
+  status        TaskStatus   @default(PENDING)
+
+  // Recurrence
+  recurrence String? // e.g., "none", "daily", "weekly", "monthly"
+
+  // Notification channels
+  notifyInApp   Boolean @default(true)
+  notifyEmail   Boolean @default(false)
+  notifySlack   Boolean @default(false)
+  notifyDiscord Boolean @default(false)
+
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application Application? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([applicationId])
+  @@index([dueDate])
+  @@index([status])
+  @@map("tasks")
+}
+
+// ==========================================
+// OFFER MODEL
+// ==========================================
+
+model Offer {
+  id            String @id @default(cuid())
+  applicationId String @unique
+
+  // Compensation breakdown
+  baseSalary Int?
+  bonus      Int?
+  equity     String? // e.g., "10000 shares", "0.5%"
+
+  currency String @default("USD")
+
+  // Benefits summary
+  benefits String? @db.Text
+
+  // Location (might differ from job posting)
+  location String?
+
+  // Decision tracking
+  deadline     DateTime?
+  decision     OfferDecision @default(PENDING)
+  decisionDate DateTime?
+
+  notes     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
+  @@index([decision])
+  @@map("offers")
+}
+
+// ==========================================
+// ACTIVITY LOG (Timeline/History)
+// ==========================================
+
+model Activity {
+  id            String       @id @default(cuid())
+  userId        String
+  applicationId String?
+  type          ActivityType
+  description   String
+  metadata      String?      @db.Text // JSON string for additional data
+  createdAt     DateTime     @default(now())
+
+  // Relations
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application Application? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([applicationId])
+  @@index([createdAt])
+  @@map("activities")
+}
+
+// ==========================================
+// ATTACHMENT MODEL (Files/Documents)
+// ==========================================
+
+model Attachment {
+  id            String   @id @default(cuid())
+  applicationId String?
+  interviewId   String?
+  fileName      String
+  fileSize      Int // Size in bytes
+  fileType      String // MIME type
+  fileUrl       String // URL to stored file (S3, Vercel Blob, etc.)
+  uploadedAt    DateTime @default(now())
+
+  // Relations
+  application Application? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  interview   Interview?   @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
+  @@index([interviewId])
+  @@map("attachments")
+}
+
+// ==========================================
+// SHARE LINK (Read-only sharing)
+// ==========================================
+
+model ShareLink {
+  id        String    @id @default(cuid())
+  userId    String
+  token     String    @unique // Random token for URL
+  scope     String // "all", "application:id", "company:id"
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("share_links")
+}
+
+// ==========================================
+// EMAIL CONNECTION (Gmail/Outlook OAuth)
+// ==========================================
+
+model EmailConnection {
+  id           String        @id @default(cuid())
+  userId       String
+  provider     EmailProvider
+  email        String
+  accessToken  String        @db.Text
+  refreshToken String?       @db.Text
+  expiresAt    DateTime?
+  scope        String? // Permissions granted
+
+  // Label/folder filtering (optional)
+  labels String[] // Gmail labels or Outlook folders to scan
+
+  lastSyncAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+  @@index([userId])
+  @@map("email_connections")
+}
+
+// ==========================================
+// AUDIT LOG (Security & Compliance)
+// ==========================================
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String // "email_accessed", "data_exported", "settings_changed", etc.
+  resource  String? // Resource affected (e.g., "application:123")
+  metadata  String?  @db.Text // JSON string with details
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
 }
