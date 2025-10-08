@@ -1,216 +1,344 @@
-# CareerPilot - Job Application Tracker CRM
+# 🚀 CareerPilot - Job Application Tracker
 
-A modern, beautiful job application tracker designed for students and early-career professionals. Track applications, parse emails, get reminders, and visualize your job search progress.
+A modern, beautiful job application tracking system built with Next.js, featuring glassmorphism design, authentication, and comprehensive settings.
 
-## 🚀 Tech Stack
+## ✨ Features
 
-- **Framework**: Next.js 14.1.0 (App Router)
-- **Language**: TypeScript 5
-- **Styling**: Tailwind CSS 3.4.17
-- **UI Components**: Shadcn/ui (New York style)
-- **Animation**: Framer Motion 11.0.3
-- **Forms**: React Hook Form + Zod
-- **Tables**: TanStack Table 8.11.6
-- **Drag & Drop**: Hello Pangea DnD 16.6.0
-- **Charts**: Recharts 2.12.0
-- **Calendar**: React Big Calendar 1.11.1
-- **Icons**: Lucide React
-- **Notifications**: Sonner
+### 🔐 Authentication
+- **Email/Password Sign Up & Sign In**
+- **Google OAuth Integration**
+- **Secure Password Hashing** (bcryptjs)
+- **Protected Routes** with Next.js middleware
+- **Session Management** with NextAuth.js
 
-## 🎨 Design
+### ⚙️ User Settings
+- **Profile Management** - Update name and email
+- **Timezone Selection** - 30+ timezones worldwide
+- **Notification Preferences**:
+  - In-App Notifications
+  - Email Notifications
+  - Slack Webhook Integration
+  - Discord Webhook Integration
+- **Data Retention Policy** - 90 days to forever
 
-This application uses a premium **glassmorphism design language** with:
-- Dark gradient backgrounds
-- Frosted glass panels with backdrop blur
-- Indigo-to-purple gradients for primary actions
-- Smooth Framer Motion animations
-- Stage-specific color coding
+### 🎨 Design
+- **Glassmorphism UI** - Modern frosted glass aesthetic
+- **Dark Theme** - Gradient background (slate → indigo)
+- **Smooth Animations** - Framer Motion transitions
+- **Responsive** - Works on all screen sizes
+- **Toast Notifications** - Sonner for user feedback
 
-See `tasks/front-end-reference.md` for complete design specifications.
+---
 
-## 📋 Prerequisites
+## 🛠️ Tech Stack
 
-- Node.js 18+ and npm
-- PostgreSQL database (local or Neon/Supabase)
-- Git
+### Core
+- **Next.js 14.1.0** - React framework with App Router
+- **TypeScript 5** - Type safety
+- **Tailwind CSS 3.4** - Utility-first styling
+- **PostgreSQL** - Database (via Neon or local)
 
-## 🛠️ Setup
+### Authentication
+- **NextAuth.js** - Authentication library
+- **Bcryptjs** - Password hashing
+- **@auth/prisma-adapter** - Prisma adapter
+
+### Database
+- **Prisma ORM** - Type-safe database client
+- **PostgreSQL** - Production database
+
+### UI Components
+- **Shadcn/ui** - Accessible components
+- **Radix UI** - Component primitives
+- **Lucide Icons** - Icon library
+- **Sonner** - Toast notifications
+- **Framer Motion** - Animations
+
+### Validation
+- **Zod** - Schema validation
+- **React Hook Form** - Form management
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+ installed
+- PostgreSQL database (local or Neon)
+- npm or yarn package manager
 
 ### 1. Clone and Install
 
-\`\`\`bash
-cd careerpilot
+```bash
+cd CareerPilot/careerpilot
 npm install
-\`\`\`
+```
 
-### 2. Environment Variables
+### 2. Set Up Environment Variables
 
-Create a \`.env.local\` file in the root directory:
+Create a `.env` file in the root:
 
-\`\`\`env
-# Database
-DATABASE_URL="postgresql://user:password@localhost:5432/careerpilot"
+```bash
+# Database (Neon PostgreSQL - free tier recommended)
+DATABASE_URL="postgresql://user:password@host/database?sslmode=require"
 
-# NextAuth
+# NextAuth.js
 NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-secret-key-here"
+NEXTAUTH_SECRET="generate-with: openssl rand -base64 32"
 
 # Google OAuth (optional)
-GOOGLE_CLIENT_ID=""
-GOOGLE_CLIENT_SECRET=""
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+```
 
-# Gmail API (optional)
-GMAIL_CLIENT_ID=""
-GMAIL_CLIENT_SECRET=""
+**Getting a Neon Database (Free)**:
+1. Sign up at [neon.tech](https://neon.tech)
+2. Create a new project
+3. Copy the connection string to `DATABASE_URL`
 
-# Microsoft Graph (optional)
-MICROSOFT_CLIENT_ID=""
-MICROSOFT_CLIENT_SECRET=""
+### 3. Set Up Database
 
-# Email Service - Resend (optional)
-RESEND_API_KEY=""
+```bash
+# Push schema to database
+npm run db:push
 
-# File Storage - Vercel Blob (optional)
-BLOB_READ_WRITE_TOKEN=""
-\`\`\`
-
-Generate a secure `NEXTAUTH_SECRET`:
-\`\`\`bash
-openssl rand -base64 32
-\`\`\`
-
-### 3. Database Setup
-
-\`\`\`bash
-# Generate Prisma client
-npx prisma generate
-
-# Run migrations
-npx prisma migrate dev
-
-# Seed database (optional)
-npm run seed
-\`\`\`
+# Seed with test data
+npm run db:seed
+```
 
 ### 4. Run Development Server
 
-\`\`\`bash
+```bash
 npm run dev
-\`\`\`
+```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:3000](http://localhost:3000) 🎉
 
-## 📜 Available Scripts
+---
 
-- \`npm run dev\` - Start development server
-- \`npm run build\` - Build for production
-- \`npm run start\` - Start production server
-- \`npm run lint\` - Run ESLint
-- \`npm run format\` - Format code with Prettier
+## 🧪 Testing
+
+See [TESTING.md](./TESTING.md) for comprehensive testing guide.
+
+### Quick Test
+
+After seeding, sign in with:
+- **Email**: `test@example.com`
+- **Password**: `password123`
+
+### Run Database Tests
+
+```bash
+npm run test:db
+```
+
+---
 
 ## 📁 Project Structure
 
-\`\`\`
+```
 careerpilot/
-├── src/
-│   ├── app/                    # Next.js App Router pages
-│   │   ├── (auth)/            # Authentication pages
-│   │   ├── (dashboard)/       # Main app pages
-│   │   ├── globals.css        # Global styles
-│   │   └── layout.tsx         # Root layout
-│   ├── components/
-│   │   ├── layout/            # Layout components (AppShell, Sidebar, Topbar)
-│   │   ├── kanban/            # Kanban board components
-│   │   ├── charts/            # Analytics charts
-│   │   ├── forms/             # Form components
-│   │   ├── tables/            # Table components
-│   │   └── ui/                # Shadcn UI primitives
-│   ├── lib/
-│   │   ├── api/               # API client functions
-│   │   ├── constants/         # App constants
-│   │   └── utils.ts           # Utility functions
-│   ├── types/
-│   │   ├── domain.ts          # Domain models
-│   │   └── enums.ts           # Enums
-│   └── styles/
-│       ├── theme.css          # Glass theme & variables
-│       └── animations.css     # Animation definitions
 ├── prisma/
-│   └── schema.prisma          # Database schema
-├── components.json            # Shadcn config
-├── tailwind.config.ts         # Tailwind config
+│   ├── schema.prisma          # Database schema
+│   └── seed.ts                # Seed script
+├── src/
+│   ├── app/
+│   │   ├── (auth)/            # Auth pages (signin, signup)
+│   │   ├── (dashboard)/       # Protected pages (dashboard, settings)
+│   │   ├── api/               # API routes
+│   │   ├── layout.tsx         # Root layout
+│   │   └── providers.tsx      # SessionProvider wrapper
+│   ├── components/
+│   │   ├── auth/              # Auth forms
+│   │   ├── settings/          # Settings sections
+│   │   └── ui/                # Shadcn components
+│   ├── lib/
+│   │   ├── auth/              # Auth utilities
+│   │   ├── db/                # Prisma client
+│   │   ├── timezones.ts       # Timezone constants
+│   │   └── utils.ts           # Utility functions
+│   ├── styles/
+│   │   ├── theme.css          # Glassmorphism theme
+│   │   └── animations.css     # Animation definitions
+│   └── middleware.ts          # Route protection
+├── scripts/
+│   └── test-all.ts            # Test suite
+├── TESTING.md                  # Testing guide
 └── package.json
-\`\`\`
+```
 
-## 🎯 Features
+---
 
-- ✅ **Application Tracking**: Track jobs through stages (discovered → applied → interviews → offer)
-- ✅ **Kanban Board**: Drag-and-drop applications between stages
-- ✅ **Table View**: Sortable, filterable data table
-- ✅ **Calendar View**: See interviews and deadlines
-- ✅ **Analytics Dashboard**: KPIs, funnel charts, time metrics
-- ✅ **Email Parsing**: Auto-create applications from Gmail/Outlook (coming soon)
-- ✅ **Smart Reminders**: Get notified for follow-ups (coming soon)
-- ✅ **Import Tools**: CSV upload, resume parsing (coming soon)
+## 🎯 Available Scripts
 
-## 🔐 Authentication
+```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run ESLint
+npm run format       # Format with Prettier
 
-Uses NextAuth.js with:
-- Email/password authentication
-- Google OAuth (optional)
-- Session-based auth
-- Protected routes via middleware
+npm run db:push      # Push schema to database
+npm run db:seed      # Seed database with test data
+npm run db:reset     # Reset database (⚠️ deletes all data)
 
-## 🗄️ Database
+npm run test:db      # Run database tests
+```
 
-Uses Prisma ORM with PostgreSQL for:
-- Type-safe database access
-- Automatic migrations
-- Schema management
+---
 
-Free hosting options:
-- **Neon**: 0.5GB free tier
-- **Supabase**: 500MB free tier
-- **Railway**: Free tier available
+## 🔒 Security Features
 
-## 📊 Admin Dashboard
+- ✅ **Password Hashing** - Bcrypt with salt rounds
+- ✅ **JWT Sessions** - Secure, httpOnly cookies
+- ✅ **Route Protection** - Middleware guards all routes
+- ✅ **API Authentication** - All API routes protected
+- ✅ **Input Validation** - Zod schemas on all endpoints
+- ✅ **XSS Protection** - React auto-escaping
+- ✅ **CSRF Protection** - NextAuth.js built-in
 
-Access at `/admin` (creator only) to view:
-- Total users and activity
-- Platform statistics
-- Database health
-- User management
+---
 
-Use \`npx prisma studio\` for direct database access.
+## 📊 Database Schema
+
+### User Model
+```prisma
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  name              String
+  password          String?   // Null for OAuth
+  avatar            String?
+  emailVerified     DateTime?
+  
+  // Settings
+  timezone          String    @default("UTC")
+  notifyInApp       Boolean   @default(true)
+  notifyEmail       Boolean   @default(true)
+  notifySlack       Boolean   @default(false)
+  notifyDiscord     Boolean   @default(false)
+  slackWebhook      String?
+  discordWebhook    String?
+  dataRetentionDays Int?      @default(365)
+  
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+```
+
+---
+
+## 🎨 Design System
+
+### Colors
+- **Background**: Dark gradient (slate → indigo)
+- **Glass Panels**: `rgba(255, 255, 255, 0.08)` with blur
+- **Primary**: Blue-500 to Indigo-600 gradient
+- **Text**: White on dark, slate-400 for secondary
+
+### Typography
+- **Font**: Inter (via next/font/google)
+- **Sizes**: 4xl (page titles), 2xl (sections), lg (cards)
+
+### Animations
+- **Duration**: 200-400ms
+- **Easing**: `cubic-bezier(0.4, 0, 0.2, 1)`
+- **Hover**: Scale + shadow effects
+
+---
 
 ## 🚢 Deployment
 
 ### Vercel (Recommended)
 
 1. Push to GitHub
-2. Import project in Vercel
-3. Add environment variables
-4. Deploy
+2. Import to Vercel
+3. Set environment variables
+4. Deploy 🎉
 
-### Manual Deployment
-
-\`\`\`bash
-npm run build
-npm run start
-\`\`\`
-
-## 📝 License
-
-MIT
-
-## 🤝 Contributing
-
-This is a personal project. Feel free to fork and adapt for your own use.
-
-## 📧 Support
-
-For issues or questions, please create an issue in the repository.
+### Environment Variables for Production
+```
+DATABASE_URL=your-production-database-url
+NEXTAUTH_URL=https://your-domain.com
+NEXTAUTH_SECRET=your-production-secret
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+```
 
 ---
 
-Built with ❤️ using Next.js and modern web technologies.
+## 📝 API Routes
+
+### Authentication
+- `POST /api/auth/signup` - Create account
+- `POST /api/auth/signin` - Sign in
+- `POST /api/auth/signout` - Sign out
+- `GET /api/auth/session` - Get session
+
+### Settings
+- `GET /api/settings` - Get user settings
+- `PATCH /api/settings` - Update settings
+
+### Protected Example
+- `GET /api/example-protected` - Demo protected route
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests (`npm run test:db`)
+5. Build (`npm run build`)
+6. Submit a pull request
+
+---
+
+## 📄 License
+
+MIT License - feel free to use this project for learning or production!
+
+---
+
+## 🎉 What's Next?
+
+### Upcoming Features (Task 2.0+)
+- 📊 **Data Models**: Applications, Companies, Contacts, Interviews
+- 📋 **Kanban Board**: Drag-and-drop pipeline
+- 📅 **Calendar**: Interview scheduling
+- 📈 **Analytics**: KPIs and charts
+- 📧 **Email Parsing**: Auto-import from Gmail/Outlook
+- 🔔 **Smart Reminders**: Follow-up notifications
+
+---
+
+## 💡 Tips
+
+### Test Users
+After seeding, you can sign in with:
+- `test@example.com` / `password123`
+- `demo@careerpilot.com` / `password456`
+- `minimal@example.com` / `secure123`
+
+### Development
+- Use `npm run dev` for hot reload
+- Use `npm run db:push` to sync schema changes
+- Use Prisma Studio: `npx prisma studio` for database GUI
+
+### Troubleshooting
+- Clear cookies if you get auth errors
+- Run `npm run db:reset` to start fresh
+- Check `.env` file is in the root directory
+- Ensure PostgreSQL is running (or Neon is accessible)
+
+---
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/yourusername/careerpilot/issues)
+- **Documentation**: [TESTING.md](./TESTING.md)
+
+---
+
+Made with ❤️ using Next.js, TypeScript, and Glassmorphism ✨
