@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { Draggable } from "@hello-pangea/dnd"
 import { Calendar, DollarSign, MapPin } from "lucide-react"
 import { format } from "date-fns"
@@ -18,6 +19,7 @@ const PRIORITY_COLORS = {
 } as const
 
 export function ApplicationCard({ application, index }: ApplicationCardProps) {
+  const router = useRouter()
   const companyInitial = application.company?.name?.[0] || "?"
   const salaryRange = 
     application.salaryMin && application.salaryMax
@@ -33,7 +35,8 @@ export function ApplicationCard({ application, index }: ApplicationCardProps) {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`glass-panel glass-panel-hover rounded-2xl p-4 cursor-grab active:cursor-grabbing ${
+          onClick={() => router.push(`/applications/${application.id}`)}
+          className={`glass-panel glass-panel-hover rounded-2xl p-4 cursor-pointer ${
             snapshot.isDragging ? "shadow-2xl scale-105 rotate-2" : ""
           }`}
         >

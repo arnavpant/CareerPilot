@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import { useRouter } from "next/navigation"
 import {
   flexRender,
   getCoreRowModel,
@@ -34,6 +35,7 @@ interface ApplicationsTableProps {
 }
 
 export function ApplicationsTable({ applications }: ApplicationsTableProps) {
+  const router = useRouter()
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -361,6 +363,7 @@ export function ApplicationsTable({ applications }: ApplicationsTableProps) {
                 table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
+                    onClick={() => router.push(`/applications/${row.original.id}`)}
                     className="border-b border-white/10 hover:bg-white/5 transition-colors cursor-pointer"
                   >
                     {row.getVisibleCells().map((cell) => (
