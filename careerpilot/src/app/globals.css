@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "../styles/theme.css";
+@import "../styles/animations.css";
+
+@layer base {
+  body {
+    background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #312E81 100%);
+    min-height: 100vh;
+    color: hsl(var(--foreground));
+    font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
