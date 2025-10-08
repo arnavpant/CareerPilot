@@ -12,13 +12,16 @@ export function UserMenu() {
   const [isOpen, setIsOpen] = useState(false)
 
   const handleSignOut = async () => {
+    const toastId = toast.loading("Signing out...")
+    
     try {
-      toast.loading("Signing out...")
       await signOut({ redirect: false })
+      toast.dismiss(toastId) // Dismiss the loading toast
       toast.success("Signed out successfully")
       router.push("/signin")
       router.refresh()
     } catch (error) {
+      toast.dismiss(toastId) // Dismiss the loading toast
       toast.error("Failed to sign out")
     }
   }
