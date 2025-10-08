@@ -14,6 +14,7 @@
     "db:studio": "npx prisma studio",
     "check:env": "tsx scripts/check-env.ts",
     "test:db": "tsx scripts/test-all.ts",
+    "test:relations": "tsx scripts/test-relations.ts",
     "test:build": "tsx scripts/test-build.ts",
     "test:all": "npm run check:env && npm run test:build && npm run test:db",
     "setup": "bash scripts/setup.sh"
