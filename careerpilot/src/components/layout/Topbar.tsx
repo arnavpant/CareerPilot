@@ -1,10 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Plus, Bell } from "lucide-react"
+import { Search, Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { UserMenu } from "./UserMenu"
+import { QuickAddDialog } from "@/components/forms/QuickAddDialog"
 
 export function Topbar() {
   const [hasNotifications, setHasNotifications] = useState(true)
@@ -25,11 +26,8 @@ export function Topbar() {
 
           {/* Right Side Actions */}
           <div className="flex items-center gap-3">
-            {/* Quick Add Button */}
-            <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all">
-              <Plus className="w-4 h-4 mr-2" />
-              Quick Add
-            </Button>
+            {/* Quick Add Dialog */}
+            <QuickAddDialog />
 
             {/* Notifications */}
             <Button variant="ghost" size="icon" className="relative">
