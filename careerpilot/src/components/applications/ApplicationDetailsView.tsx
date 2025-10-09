@@ -14,6 +14,8 @@ import { ActivityTab } from "./tabs/ActivityTab"
 import { InterviewsTab } from "./tabs/InterviewsTab"
 import { TasksTab } from "./tabs/TasksTab"
 import { FilesTab } from "./tabs/FilesTab"
+import { EditApplicationDialog } from "./EditApplicationDialog"
+import { DeleteApplicationDialog } from "./DeleteApplicationDialog"
 import type { Application, Company, Interview, Task, Activity, Attachment } from "@prisma/client"
 
 interface ApplicationDetailsViewProps {
@@ -28,6 +30,8 @@ interface ApplicationDetailsViewProps {
 
 export function ApplicationDetailsView({ application }: ApplicationDetailsViewProps) {
   const router = useRouter()
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const stageConfig = STAGE_CONFIG[application.stage]
   
   const salaryRange = 
@@ -84,11 +88,21 @@ export function ApplicationDetailsView({ application }: ApplicationDetailsViewPr
             
             {/* Actions */}
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="bg-white/5 border-white/10 hover:bg-white/10">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="bg-white/5 border-white/10 hover:bg-white/10"
+                onClick={() => setEditDialogOpen(true)}
+              >
                 <Edit className="w-4 h-4 mr-2" />
                 Edit
               </Button>
-              <Button variant="outline" size="sm" className="bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
+                onClick={() => setDeleteDialogOpen(true)}
+              >
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete
               </Button>
@@ -182,6 +196,22 @@ export function ApplicationDetailsView({ application }: ApplicationDetailsViewPr
           <FilesTab attachments={application.attachments} applicationId={application.id} />
         </TabsContent>
       </Tabs>
+
+      {/* Edit Dialog */}
+      <EditApplicationDialog
+        application={application}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+      />
+
+      {/* Delete Dialog */}
+      <DeleteApplicationDialog
+        applicationId={application.id}
+        applicationTitle={application.roleTitle}
+        companyName={application.company?.name || "Unknown Company"}
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+      />
     </div>
   )
 }

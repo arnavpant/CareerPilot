@@ -111,10 +111,13 @@ export function QuickAddDialog() {
       })
 
       if (!companyResponse.ok) {
-        throw new Error("Failed to create company")
+        const errorData = await companyResponse.json()
+        console.error("Company creation failed:", errorData)
+        throw new Error(errorData.error || "Failed to create company")
       }
 
-      const { data: company } = await companyResponse.json()
+      const companyResult = await companyResponse.json()
+      const company = companyResult.data
 
       // Parse salary values
       const salaryMin = data.salaryMin ? parseInt(data.salaryMin) * 1000 : undefined
@@ -126,28 +129,34 @@ export function QuickAddDialog() {
         : []
 
       // Create the application
+      const applicationPayload = {
+        companyId: company.id,
+        roleTitle: data.roleTitle,
+        stage: data.stage,
+        location: data.location || undefined,
+        salaryMin,
+        salaryMax,
+        source: data.source || undefined,
+        postingUrl: data.url || undefined,
+        tags,
+        notes: data.notes || undefined,
+      }
+
+      console.log("Creating application with payload:", applicationPayload)
+
       const applicationResponse = await fetch("/api/applications", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          companyId: company.id,
-          roleTitle: data.roleTitle,
-          stage: data.stage,
-          location: data.location || undefined,
-          salaryMin,
-          salaryMax,
-          source: data.source || undefined,
-          postingUrl: data.url || undefined,
-          tags,
-          notes: data.notes || undefined,
-        }),
+        body: JSON.stringify(applicationPayload),
       })
 
       if (!applicationResponse.ok) {
-        throw new Error("Failed to create application")
+        const errorData = await applicationResponse.json()
+        console.error("Application creation failed:", errorData)
+        throw new Error(errorData.error || "Failed to create application")
       }
 
-      const { data: application } = await applicationResponse.json()
+      const applicationResult = await applicationResponse.json()
 
       toast.success("Application added!", {
         description: `${data.roleTitle} at ${data.companyName}`,
@@ -162,7 +171,7 @@ export function QuickAddDialog() {
     } catch (error) {
       console.error("Error creating application:", error)
       toast.error("Failed to add application", {
-        description: "Please try again",
+        description: error instanceof Error ? error.message : "Please try again",
       })
     } finally {
       setIsSubmitting(false)

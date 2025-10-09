@@ -64,4 +64,3 @@ export const listApplicationsSchema = z.object({
   sortBy: z.enum(["createdAt", "appliedAt", "updatedAt", "roleTitle"]).optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
 })
-
