@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Settings as SettingsIcon, Loader2 } from "lucide-react"
 import { ProfileSection } from "@/components/settings/ProfileSection"
 import { TimezoneSection } from "@/components/settings/TimezoneSection"
+import { EmailConnectionsSection } from "@/components/settings/EmailConnectionsSection"
 import { NotificationsSection } from "@/components/settings/NotificationsSection"
 import { DataRetentionSection } from "@/components/settings/DataRetentionSection"
 import { toast } from "sonner"
@@ -121,6 +122,9 @@ export default function SettingsPage() {
 
         {/* Timezone Section */}
         <TimezoneSection initialTimezone={settings.timezone} onUpdate={fetchSettings} />
+
+        {/* Email Connections Section */}
+        <EmailConnectionsSection onUpdate={fetchSettings} />
 
         {/* Notifications Section */}
         <NotificationsSection
