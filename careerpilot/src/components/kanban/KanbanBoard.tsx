@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { DragDropContext, DropResult } from "@hello-pangea/dnd"
+import { Search } from "lucide-react"
 import { toast } from "sonner"
+import { Input } from "@/components/ui/input"
 import { StageColumn } from "./StageColumn"
 import { STAGE_ORDER } from "@/lib/constants/stages"
 import type { Application, Company, ApplicationStage } from "@prisma/client"
@@ -16,10 +18,20 @@ export function KanbanBoard({ initialApplications }: KanbanBoardProps) {
   const router = useRouter()
   const [applications, setApplications] = useState(initialApplications)
   const [isUpdating, setIsUpdating] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
 
-  // Group applications by stage
+  // Filter applications by search query (company name or role title)
+  const filteredApplications = applications.filter((app) => {
+    if (!searchQuery.trim()) return true
+    const query = searchQuery.toLowerCase()
+    const companyName = app.company?.name?.toLowerCase() || ""
+    const roleTitle = app.roleTitle?.toLowerCase() || ""
+    return companyName.includes(query) || roleTitle.includes(query)
+  })
+
+  // Group filtered applications by stage
   const applicationsByStage = STAGE_ORDER.reduce((acc, stage) => {
-    acc[stage] = applications.filter((app) => app && app.stage === stage)
+    acc[stage] = filteredApplications.filter((app) => app && app.stage === stage)
     return acc
   }, {} as Record<ApplicationStage, (Application & { company: Company | null })[]>)
 
@@ -93,26 +105,48 @@ export function KanbanBoard({ initialApplications }: KanbanBoardProps) {
   }
 
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="flex gap-4 overflow-x-auto pb-4">
-        {STAGE_ORDER.map((stage) => (
-          <StageColumn
-            key={stage}
-            stage={stage}
-            applications={applicationsByStage[stage]}
+    <div className="space-y-6">
+      {/* Search Bar */}
+      <div className="glass-panel rounded-2xl p-4">
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input
+            type="search"
+            placeholder="Search by company or position..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 bg-white/5 border-white/10 focus-visible:ring-indigo-500"
           />
-        ))}
-      </div>
-      
-      {/* Loading indicator */}
-      {isUpdating && (
-        <div className="fixed bottom-4 right-4 glass-panel px-4 py-2 rounded-xl">
-          <div className="flex items-center gap-2 text-sm text-white">
-            <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-            Updating...
-          </div>
         </div>
-      )}
-    </DragDropContext>
+        {searchQuery && (
+          <p className="text-sm text-slate-400 mt-2">
+            Found {filteredApplications.length} application{filteredApplications.length !== 1 ? 's' : ''}
+          </p>
+        )}
+      </div>
+
+      {/* Kanban Board */}
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+          {STAGE_ORDER.map((stage) => (
+            <StageColumn
+              key={stage}
+              stage={stage}
+              applications={applicationsByStage[stage]}
+            />
+          ))}
+        </div>
+        
+        {/* Loading indicator */}
+        {isUpdating && (
+          <div className="fixed bottom-4 right-4 glass-panel px-4 py-2 rounded-xl">
+            <div className="flex items-center gap-2 text-sm text-white">
+              <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+              Updating...
+            </div>
+          </div>
+        )}
+      </DragDropContext>
+    </div>
   )
 }

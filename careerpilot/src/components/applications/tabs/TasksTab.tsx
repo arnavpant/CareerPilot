@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { format } from "date-fns"
 import { CheckCircle2, Circle, Clock, Plus, Edit2, Trash2, Loader2 } from "lucide-react"
@@ -312,6 +312,26 @@ function TaskFormDialog({
     dueDate: task?.dueDate ? format(new Date(task.dueDate), "yyyy-MM-dd") : "",
     priority: task?.priority || "MEDIUM",
   })
+
+  // Update form data when task changes (for edit mode)
+  useEffect(() => {
+    if (task) {
+      setFormData({
+        title: task.title || "",
+        description: task.description || "",
+        dueDate: task.dueDate ? format(new Date(task.dueDate), "yyyy-MM-dd") : "",
+        priority: task.priority || "MEDIUM",
+      })
+    } else {
+      // Reset form for create mode
+      setFormData({
+        title: "",
+        description: "",
+        dueDate: "",
+        priority: "MEDIUM",
+      })
+    }
+  }, [task, open])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

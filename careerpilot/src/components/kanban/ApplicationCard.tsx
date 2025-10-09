@@ -36,64 +36,69 @@ export function ApplicationCard({ application, index }: ApplicationCardProps) {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           onClick={() => router.push(`/applications/${application.id}`)}
-          className={`glass-panel glass-panel-hover rounded-2xl p-4 cursor-pointer ${
+          className={`glass-panel glass-panel-hover rounded-xl p-3 cursor-pointer ${
             snapshot.isDragging ? "shadow-2xl scale-105 rotate-2" : ""
           }`}
         >
-          <div className="flex items-start gap-3 mb-3">
+          <div className="flex items-start gap-2 mb-2">
             {/* Company Avatar */}
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
               {companyInitial}
             </div>
 
             <div className="flex-1 min-w-0">
               {/* Position Title */}
-              <h4 className="font-semibold text-white text-sm mb-1 truncate">
+              <h4 className="font-semibold text-white text-xs mb-0.5 truncate">
                 {application.roleTitle}
               </h4>
               
               {/* Company Name */}
-              <p className="text-sm text-slate-400 truncate">
+              <p className="text-xs text-slate-400 truncate">
                 {application.company?.name || "Unknown Company"}
               </p>
             </div>
           </div>
 
           {/* Metadata */}
-          <div className="space-y-1.5 text-xs text-slate-500">
+          <div className="space-y-1 text-xs text-slate-500">
             {application.location && (
-              <div className="flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5" />
+              <div className="flex items-center gap-1">
+                <MapPin className="w-3 h-3" />
                 <span className="truncate">{application.location}</span>
               </div>
             )}
             
             {salaryRange && (
-              <div className="flex items-center gap-1.5">
-                <DollarSign className="w-3.5 h-3.5" />
+              <div className="flex items-center gap-1">
+                <DollarSign className="w-3 h-3" />
                 <span>{salaryRange}</span>
               </div>
             )}
             
-            <div className="flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-1">
+              <Calendar className="w-3 h-3" />
               <span>
-                Applied {format(new Date(application.appliedAt || application.createdAt), "MMM d")}
+                {format(new Date(application.appliedAt || application.createdAt), "MMM d")}
               </span>
             </div>
           </div>
 
           {/* Tags */}
           {application.tags && application.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-3">
-              {application.tags.slice(0, 3).map((tag) => (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {application.tags.slice(0, 2).map((tag) => (
                 <span
                   key={tag}
-                  className="text-xs px-2 py-0.5 rounded bg-white/5 text-slate-400"
+                  className="text-xs px-1.5 py-0.5 rounded bg-white/5 text-slate-400"
                 >
                   {tag}
                 </span>
               ))}
+              {application.tags.length > 2 && (
+                <span className="text-xs px-1.5 py-0.5 rounded bg-white/5 text-slate-400">
+                  +{application.tags.length - 2}
+                </span>
+              )}
             </div>
           )}
         </div>

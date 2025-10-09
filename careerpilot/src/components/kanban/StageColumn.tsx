@@ -14,18 +14,18 @@ export function StageColumn({ stage, applications }: StageColumnProps) {
   const config = STAGE_CONFIG[stage]
 
   return (
-    <div className="flex-shrink-0 w-80">
+    <div className="flex flex-col">
       {/* Column Header */}
-      <div className="glass-panel p-4 mb-4 rounded-2xl">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-white">{config.label}</h3>
-          <span className={`text-sm ${config.textColor} bg-white/10 px-2 py-1 rounded-lg font-medium`}>
+      <div className="glass-panel p-3 mb-3 rounded-xl">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-semibold text-white text-sm">{config.label}</h3>
+          <span className={`text-xs ${config.textColor} bg-white/10 px-2 py-0.5 rounded font-medium`}>
             {applications.length}
           </span>
         </div>
         
         {/* Stage Indicator Bar */}
-        <div className={`h-1 rounded-full bg-gradient-to-r ${config.color}`} />
+        <div className={`h-0.5 rounded-full bg-gradient-to-r ${config.color}`} />
       </div>
 
       {/* Droppable Area */}
@@ -34,7 +34,7 @@ export function StageColumn({ stage, applications }: StageColumnProps) {
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className={`space-y-3 min-h-[200px] rounded-2xl p-3 transition-colors ${
+            className={`space-y-2 min-h-[150px] rounded-xl p-2 transition-colors ${
               snapshot.isDraggingOver ? config.bgColor : ""
             }`}
           >
@@ -49,8 +49,8 @@ export function StageColumn({ stage, applications }: StageColumnProps) {
             
             {/* Empty State */}
             {applications.length === 0 && !snapshot.isDraggingOver && (
-              <div className="text-center py-8 text-slate-500 text-sm">
-                No applications yet
+              <div className="text-center py-6 text-slate-500 text-xs">
+                No applications
               </div>
             )}
           </div>

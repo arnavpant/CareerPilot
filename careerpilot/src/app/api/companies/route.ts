@@ -107,15 +107,22 @@ export async function POST(req: NextRequest) {
           mode: "insensitive",
         },
       },
+      include: {
+        _count: {
+          select: {
+            applications: true,
+            contacts: true,
+          },
+        },
+      },
     })
 
+    // If company exists, return it instead of creating a new one
     if (existingCompany) {
-      return successResponse(
-        { error: "Company with this name already exists" },
-        409
-      )
+      return successResponse(existingCompany, 200)
     }
 
+    // Create new company
     const company = await prisma.company.create({
       data: {
         userId: user!.id,

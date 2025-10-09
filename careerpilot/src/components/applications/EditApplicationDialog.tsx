@@ -29,6 +29,7 @@ import { STAGE_ORDER, STAGE_CONFIG } from "@/lib/constants/stages"
 import type { Application, Company } from "@prisma/client"
 
 const editApplicationSchema = z.object({
+  companyName: z.string().min(1, "Company name is required"),
   roleTitle: z.string().min(1, "Position title is required"),
   location: z.string().optional(),
   source: z.string().optional(),
@@ -62,6 +63,7 @@ export function EditApplicationDialog({
   } = useForm<EditApplicationFormData>({
     resolver: zodResolver(editApplicationSchema),
     defaultValues: {
+      companyName: application.company?.name || "",
       roleTitle: application.roleTitle,
       location: application.location || "",
       source: application.source || "",
@@ -77,6 +79,23 @@ export function EditApplicationDialog({
     setIsSubmitting(true)
 
     try {
+      // First, create or find the company if name changed
+      let companyId = application.companyId
+      if (data.companyName !== application.company?.name) {
+        const companyResponse = await fetch("/api/companies", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: data.companyName }),
+        })
+
+        if (!companyResponse.ok) {
+          throw new Error("Failed to create/find company")
+        }
+
+        const company = await companyResponse.json()
+        companyId = company.id
+      }
+
       const salaryMin = data.salaryMin ? parseInt(data.salaryMin) * 1000 : undefined
       const salaryMax = data.salaryMax ? parseInt(data.salaryMax) * 1000 : undefined
       const tags = data.tags
@@ -87,6 +106,7 @@ export function EditApplicationDialog({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          companyId,
           roleTitle: data.roleTitle,
           location: data.location || undefined,
           source: data.source || undefined,
@@ -127,6 +147,21 @@ export function EditApplicationDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Company Name */}
+          <div className="space-y-2">
+            <Label htmlFor="companyName" className="text-slate-300">
+              Company Name <span className="text-red-400">*</span>
+            </Label>
+            <Input
+              id="companyName"
+              {...register("companyName")}
+              className="bg-white/5 border-white/10 focus-visible:ring-indigo-500"
+            />
+            {errors.companyName && (
+              <p className="text-sm text-red-400">{errors.companyName.message}</p>
+            )}
+          </div>
+
           {/* Position */}
           <div className="space-y-2">
             <Label htmlFor="roleTitle" className="text-slate-300">

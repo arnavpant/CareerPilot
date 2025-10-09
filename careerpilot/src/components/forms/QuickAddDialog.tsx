@@ -116,8 +116,13 @@ export function QuickAddDialog() {
         throw new Error(errorData.error || "Failed to create company")
       }
 
-      const companyResult = await companyResponse.json()
-      const company = companyResult.data
+      const company = await companyResponse.json()
+      console.log("Company created/found:", company)
+
+      // Validate company has an ID
+      if (!company || !company.id) {
+        throw new Error("Failed to get company ID from server")
+      }
 
       // Parse salary values
       const salaryMin = data.salaryMin ? parseInt(data.salaryMin) * 1000 : undefined
@@ -156,7 +161,8 @@ export function QuickAddDialog() {
         throw new Error(errorData.error || "Failed to create application")
       }
 
-      const applicationResult = await applicationResponse.json()
+      const application = await applicationResponse.json()
+      console.log("Application created:", application)
 
       toast.success("Application added!", {
         description: `${data.roleTitle} at ${data.companyName}`,
