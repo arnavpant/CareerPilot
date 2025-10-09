@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { DragDropContext, DropResult } from "@hello-pangea/dnd"
 import { toast } from "sonner"
 import { StageColumn } from "./StageColumn"
@@ -12,12 +13,13 @@ interface KanbanBoardProps {
 }
 
 export function KanbanBoard({ initialApplications }: KanbanBoardProps) {
+  const router = useRouter()
   const [applications, setApplications] = useState(initialApplications)
   const [isUpdating, setIsUpdating] = useState(false)
 
   // Group applications by stage
   const applicationsByStage = STAGE_ORDER.reduce((acc, stage) => {
-    acc[stage] = applications.filter((app) => app.stage === stage)
+    acc[stage] = applications.filter((app) => app && app.stage === stage)
     return acc
   }, {} as Record<ApplicationStage, (Application & { company: Company | null })[]>)
 
@@ -55,16 +57,23 @@ export function KanbanBoard({ initialApplications }: KanbanBoardProps) {
         throw new Error("Failed to update application")
       }
 
-      const updated = await response.json()
+      const result = await response.json()
       
       toast.success("Application moved", {
         description: `Moved to ${destStage.toLowerCase()} stage`,
       })
 
-      // Update with server response
-      setApplications((prev) =>
-        prev.map((app) => (app.id === draggableId ? updated.data : app))
-      )
+      // Update with server response - ensure we keep the app in the array
+      if (result.data) {
+        setApplications((prev) =>
+          prev.map((app) => 
+            app && app.id === draggableId ? { ...app, ...result.data } : app
+          )
+        )
+      }
+
+      // Refresh server data so other pages (like table view) get updated data
+      router.refresh()
     } catch (error) {
       // Revert on error
       setApplications((prev) =>

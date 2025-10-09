@@ -49,10 +49,9 @@ export async function GET(req: NextRequest) {
       where.source = filters.source
     }
 
-    if (filters.tags) {
-      const tagArray = filters.tags.split(",").map((t) => t.trim())
+    if (filters.tags && filters.tags.length > 0) {
       where.tags = {
-        hasSome: tagArray,
+        hasSome: filters.tags,
       }
     }
 
@@ -76,12 +75,16 @@ export async function GET(req: NextRequest) {
     }
 
     // Build orderBy
+    const sortBy = filters.sortBy || "createdAt"
+    const sortOrder = filters.sortOrder || "desc"
     const orderBy: Prisma.ApplicationOrderByWithRelationInput = {
-      [filters.sortBy]: filters.sortOrder,
+      [sortBy]: sortOrder,
     }
 
     // Calculate pagination
-    const skip = (filters.page - 1) * filters.limit
+    const page = filters.page || 1
+    const limit = filters.limit || 20
+    const skip = (page - 1) * limit
 
     // Fetch applications with related data
     const [applications, total] = await Promise.all([
@@ -112,7 +115,7 @@ export async function GET(req: NextRequest) {
       prisma.application.count({ where }),
     ])
 
-    return paginatedResponse(applications, filters.page, filters.limit, total)
+    return paginatedResponse(applications, page, limit, total)
   } catch (error) {
     return handleApiError(error)
   }
